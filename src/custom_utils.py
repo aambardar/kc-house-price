@@ -24,7 +24,8 @@ class DataPrepUtil:
         return col_groups
 
     def plot_variable_distribution(self, variables: list, df: pd.DataFrame, bins: int = 50, color='aqua',
-                                   figsize: tuple = (12, 8), dpi: int = 150):
+                                   figsize: tuple = (12, 8), dpi: int = 130):
+        self.log_obj.info('START ...')
         num_plots = len(variables)
 
         if num_plots > 9:
@@ -58,9 +59,11 @@ class DataPrepUtil:
         plt.legend(loc='best')
         plt.tight_layout()
         plt.show()
+        self.log_obj.info('... FINISH')
 
     def plot_residual_distribution(self, variables: list, errors: pd.DataFrame, df: pd.DataFrame, color='grey',
-                                   edgecolor='black', figsize: tuple = (12, 8), dpi: int = 150):
+                                   edgecolor='black', figsize: tuple = (12, 8), dpi: int = 130):
+        self.log_obj.info('START ...')
         num_plots = len(variables)
 
         if num_plots > 9:
@@ -69,7 +72,8 @@ class DataPrepUtil:
         num_cols = math.ceil(math.sqrt(num_plots))
         num_rows = math.ceil(num_plots / num_cols)
         fig, axes = plt.subplots(num_rows, num_cols, figsize=figsize, dpi=dpi)
-        self.log_obj.info(f'subplots={num_plots}; in ({num_rows},{num_cols}) format. And axes shape={1 if num_plots == 1 else axes.shape}')
+        self.log_obj.info(
+            f'subplots={num_plots}; in ({num_rows},{num_cols}) format. And axes shape={1 if num_plots == 1 else axes.shape}')
 
         if num_plots == 1:
             axes = [axes]
@@ -96,57 +100,34 @@ class DataPrepUtil:
         plt.legend(loc='best')
         plt.tight_layout()
         plt.show()
+        self.log_obj.info('... FINISH')
 
-    @staticmethod
-    def remove_missing_values(df: pd.DataFrame):
-        """
-        Remove missing values from a dataframe
-        """
-        return df.dropna()
+    def plot_filled_values_percent(self, df: pd.DataFrame, color='aqua', figsize: tuple = (8, 6), dpi: int = 130):
+        self.log_obj.info('START ...')
+        filled_values_percent = (df.notnull().sum() / len(df) * 100).sort_values()
+        fig, axes = plt.subplots(figsize=figsize, dpi=dpi)
+        # Create bars representing total values (set to 100)
+        axes.barh(filled_values_percent.index, [100] * len(df.columns), color='#f5f5f5')
+        # Create bars representing filled values
+        axes.barh(filled_values_percent.index, filled_values_percent, color='turquoise')
 
-    @staticmethod
-    def replace_missing_values(df: pd.DataFrame, value: any):
-        """
-        Replace missing values in a dataframe with a specified value
-        """
-        return df.fillna(value)
-
-    @staticmethod
-    def encode_categorical_data(df: pd.DataFrame):
-        """
-        One-hot encode categorical variables in a dataframe
-        """
-        return pd.get_dummies(df)
-
-    @staticmethod
-    def plot_scatter(df: pd.DataFrame, x: str, y: str):
-        """
-        Generate a scatter plot from a dataframe
-        """
-        plt.scatter(df[x], df[y])
-        plt.title(f'Scatter plot of {y} vs {x}')
-        plt.xlabel(x)
-        plt.ylabel(y)
+        axes.set_xlim([0, 100])
+        axes.set_xlabel('Percentage (%) filled')
+        axes.set_title('Percentage of filled values in each column')
         plt.show()
+        self.log_obj.info('... FINISH')
 
-    @staticmethod
-    def plot_histogram(df: pd.DataFrame, column: str):
-        """
-        Generate a histogram from a dataframe
-        """
-        plt.hist(df[column])
-        plt.title(f'Histogram of {column}')
-        plt.xlabel(column)
-        plt.ylabel('Count')
+    def plot_cat_col_cardinality(self, df: pd.DataFrame, color='turquoise', height=0.75,
+                                 figsize: tuple = (6, 9), dpi: int = 150):
+        self.log_obj.info('START ...')
+        cardinality = df.nunique().sort_values(ascending=False)
+        fig, axes = plt.subplots(figsize=figsize, dpi=dpi)
+        axes.barh(cardinality.index, cardinality, color=color, height=height)
+        for i in range(len(df.columns)):
+            axes.text(cardinality.iloc[i] + 0.5, i,
+                      f'{str(cardinality.iloc[i])} among {df[cardinality.index[i]].count()}', va='center', fontsize=7)
+        axes.set_xlim([0, cardinality.iloc[0] + 5])
+        axes.set_xlabel('Unique values (aka cardinality) among total non null values')
+        axes.set_title('Cardinality of categorical columns')
         plt.show()
-
-    @staticmethod
-    def plot_bar_chart(df: pd.DataFrame, column: str):
-        """
-        Generate a bar chart from a dataframe
-        """
-        df[column].value_counts().plot(kind='bar')
-        plt.title(f'Bar chart of {column}')
-        plt.xlabel(column)
-        plt.ylabel('Count')
-        plt.show()
+        self.log_obj.info('... FINISH')
