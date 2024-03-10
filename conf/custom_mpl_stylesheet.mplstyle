@@ -23,7 +23,7 @@ axes.axisbelow: True            # Sets axis gridlines below lines and patches.
 axes.labelsize: 9               # font size of the x and y labels
 xtick.labelsize: 7              # font size of the x tick labels
 ytick.labelsize: 7              # font size of the y tick labels
-font.family: Bahnschrift        # font family for text
+font.family: Fira Code          # font family for text
 font.size: 10                   # default font size for text, given in points.
 xtick.major.pad: 8              # distance to major tick label in points
 ytick.major.pad: 12             # distance to major tick label in points
